@@ -1,6 +1,10 @@
 set -x
 export NCCL_DEBUG=WARN
-export WANDB_API_KEY='--'
+export WANDB_API_KEY=''
+if [ -z "$WANDB_API_KEY" ]; then
+    echo "WANDB_API_KEY is not set"
+    exit 1
+fi
 export VLLM_ATTENTION_BACKEND=FLASH_ATTN
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export TOKENIZERS_PARALLELISM=true
@@ -8,11 +12,13 @@ export TOKENIZERS_PARALLELISM=true
 PROJECT_NAME='Sky-T1-7B'
 EXPERIMENT_NAME='Sky-T1-mini'
 # ```bash
-# python data_prepare_mini.py --output ./sky-t1-mini
+# python data_prepare_mini.py --output ./dataset/sky-t1-mini
 # ```
-DATA_PATH='/sky-t1-rl/data/sky-t1-mini'
+DATA_PATH='./dataset/sky-t1-mini'
 SFT_MODEL_PATH=deepseek-ai/DeepSeek-R1-Distill-Qwen-7B
 CKPT_PATH='/ckpt'
+
+ray stop
 
 port=6379
 ray start --head \

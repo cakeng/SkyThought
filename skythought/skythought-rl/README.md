@@ -24,12 +24,13 @@ pip3 install -e .
 ```
 
 ### Prepare the data
-`python data/data_prepare_*.py --output {corresponding path}`
+```bash
+python data/data_prepare_zero.py --output ./dataset/sky-t1-7b-zero
+```
 
 ### Launch the training
 ```bash
-cd examples/sky-t1
-bash ./run-sky-t1-7b-zero.sh
+bash ./examples/sky-t1/run-sky-t1-7b-zero.sh
 ```
 
 

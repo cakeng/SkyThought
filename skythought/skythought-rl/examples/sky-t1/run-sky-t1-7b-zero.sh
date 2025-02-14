@@ -1,18 +1,24 @@
 set -x
 export NCCL_DEBUG=WARN
-export WANDB_API_KEY='--'
+export WANDB_API_KEY=''
+if [ -z "$WANDB_API_KEY" ]; then
+    echo "WANDB_API_KEY is not set"
+    exit 1
+fi
 export VLLM_ATTENTION_BACKEND=FLASH_ATTN
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export TOKENIZERS_PARALLELISM=true
 
-PROJECT_NAME='Sky-T1-7b'
+PROJECT_NAME='Sky-T1-7B'
 EXPERIMENT_NAME='Sky-T1-7B-Zero'
 # ```bash
-# python data_prepare_zero.py --output ./sky-t1-7b-zero
+# python data_prepare_zero.py --output ./dataset/sky-t1-7b-zero
 # ```
-DATA_PATH='./data/sky-t1-7b-zero'
+DATA_PATH='./dataset/sky-t1-7b-zero'
 SFT_MODEL_PATH=Qwen/Qwen2.5-Math-7B
 CKPT_PATH='/ckpt'
+
+ray stop
 
 port=6379
 ray start --head \
