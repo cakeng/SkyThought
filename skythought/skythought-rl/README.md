@@ -30,6 +30,7 @@ python data/data_prepare_zero.py --output ./dataset/sky-t1-7b-zero
 
 ### Launch the training
 ```bash
+# Please add your WandB API key to the script before running!
 bash ./examples/sky-t1/run-sky-t1-7b-zero.sh
 ```
 
