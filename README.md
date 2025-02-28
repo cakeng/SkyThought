@@ -20,6 +20,7 @@
 
 
 # News
+- **[2025/02/21]** 🎉 We released S*: Test time scaling for code generation ([paper](https://arxiv.org/pdf/2502.14382), [code](https://github.com/NovaSky-AI/SkyThought/tree/main/skythought/test-time-scaling)), a simple and extensible test time scaling framework for code generation.
 - **[2025/02/11]** 🎉 We released Sky-T1-7B ([model](https://huggingface.co/NovaSky-AI/Sky-T1-7B)) and Sky-T1-mini ([model](https://huggingface.co/NovaSky-AI/Sky-T1-mini)) to demonstrate the potential of RL in further enhancing model's capability beyond distillation.
 - **[2025/01/23]** ⚡️ We released Sky-T1-32B-Flash ([model](https://huggingface.co/NovaSky-AI/Sky-T1-32B-Flash), [data](https://huggingface.co/datasets/NovaSky-AI/Sky-T1_preference_data_10k)) to tackle overthinking and reduce reasoning sequence lengths while maintaining accuracy.
 - **[2025/01/19]** 🎉 [Chat demo](http://164.152.23.196:3000/) for Sky-T1-32B-Preview is alive! Please check it out!
@@ -37,7 +38,7 @@
 
 We open source the code and scripts we used for data curation, training, and evaluation for Sky-T1-32B-Preview, you can find more details in each directory.
 - [`recipes`](./recipes/): Recipes - data curation steps and training strategies - for building our models `Sky-T1-32B-Flash`, `Sky-T1-32B-Preview` and `Sky-T1-7B` series. 
-- [`skythought/skythought_evals`](./skythought/skythought_evals/): Our data generation and evaluation library. 
+- [`skythought/evals`](./skythought/evals/): Our data generation and evaluation library. 
 - [`skythought/train`](./skythought/train/): Training scripts for Sky-T1. We use [Llama-Factory](https://github.com/hiyouga/LLaMA-Factory) to perform training. 
 - [`skythought/skythought-rl`](./skythought/skythought-rl/): RL training code for Sky-T1-7B and Sky-T1-mini.
 
@@ -45,15 +46,31 @@ We open source the code and scripts we used for data curation, training, and eva
 
 ## Usage
 
-First, clone the repository and install the package
+You can install the latest release from PyPI or from [source](#installing-from-source):
 
 ```shell
+pip install skythought
+```
+
+### Installing from source
+
+```shell
+# Clone the repository
 git clone https://github.com/NovaSky-AI/SkyThought.git
 cd SkyThought
-# installs shown for conda
-conda create -n eval python==3.10
-conda activate eval 
-pip install -e .
+
+# Create and activate a virtual environment (using uv here)
+uv venv --python 3.10
+source .venv/bin/activate
+
+# Install the package in editable mode
+uv pip install -e .
+```
+
+Running evaluation is as simple as: 
+
+```bash
+skythought evaluate --model NovaSky-AI/Sky-T1-32B-Preview --task aime24
 ```
 
 We support a wide variety of datasets in mathematics, science and coding:
@@ -71,8 +88,9 @@ We support a wide variety of datasets in mathematics, science and coding:
 - MMLU Pro
 - MinervaMath
 - GSM8K
+- AIME'25
 
-For running evaluation, please refer to [skythought_evals/README.md](skythought/skythought_evals/README.md).
+For more details, please refer to our [evaluation guide](examples/evaluate.ipynb) and the [evaluation README](skythought/evals/README.md).
 
 
 ### Evaluation results
@@ -105,7 +123,7 @@ We also evaluate on non-reasoning benchmarks (these are benchmarks for instructi
 | BFCL-v3 | 53.18 | **58.92** | 17.41 | [BFCL](https://github.com/ShishirPatil/gorilla/tree/main/berkeley-function-call-leaderboard) |
 | Arena-Hard | **74.79** | 66.51 | 52.6 | [Arena-Hard-Auto](https://github.com/lmarena/arena-hard-auto) |
 
-For more details, refer [here](./skythought/skythought_evals/base_instruct_evals.md).
+For more details, refer [here](./skythought/evals/base_instruct_evals.md).
 
 ## Fully Open-source: Driving Progress Together
 We believe that open-source collaboration drives progress, and with Sky-T1-32B-Preview, we are fully committed to empowering the community. We open-source all details (i.e., data, codes, model weights) to enable the community to replicate and improve on our results *easily*:

@@ -6,7 +6,7 @@ Give below are the instructions to replicate the data preprocessing and training
 
 ## Setup
 
-Make sure you have installed the `skythought-evals` package as outlined in the [README.md](/README.md#usage). All the data curation commands are provided from the root directory of the repo.
+Make sure you have installed the `skythought` package as outlined in the [README.md](/README.md#usage). All the data curation commands are provided from the root directory of the repo.
 Set the env variable `SKYT_HOME` as the directory for the final dataset. 
 
 ## Training Data Curation
@@ -30,33 +30,50 @@ The expected output is labeled_source_0_-1.json. We also provide instructions to
 Inference the results from QwQ on several datasets. In preview version, we use data from the following dataset.
 
 ```shell
-python -m skythought_evals.inference_and_check --task apps --model Qwen/QwQ-32B-Preview --tp 8 --max_tokens 16384 --split test --difficulty all --result-dir $SKYT_HOME/data --inference
+skythought generate --task apps --model Qwen/QwQ-32B-Preview --backend vllm --backend-args tp=8 --sampling-params max_tokens=16384 --task-args dataset_split=test --result-dir $SKYT_HOME/data
 
-python -m skythought_evals.inference_and_check --task taco --model Qwen/QwQ-32B-Preview --tp 8 --max_tokens 16384 --split train --difficulty MEDIUM--result-dir $SKYT_HOME/data --inference
+skythought generate --task taco --model Qwen/QwQ-32B-Preview --backend vllm --backend-args tp=8 --sampling-params max_tokens=16384 --task-args '{"dataset_split": "train", "preprocess_config": {"difficulty": "MEDIUM"}}' --result-dir $SKYT_HOME/data
 
-python -m skythought_evals.inference_and_check --task taco --model Qwen/QwQ-32B-Preview --tp 8 --max_tokens 16384 --split test --difficulty all --result-dir $SKYT_HOME/data --inference
+skythought generate --task numina_math --model Qwen/QwQ-32B-Preview --backend vllm --backend-args tp=8 --sampling-params max_tokens=16384 --result-dir $SKYT_HOME/data
 
-python -m skythought_evals.inference_and_check --task numina --model Qwen/QwQ-32B-Preview --tp 8 --max_tokens 16384 --split train --source math --filter-difficulty --result-dir $SKYT_HOME/data --inference
+skythought generate --task numina_amc_aime --model Qwen/QwQ-32B-Preview --backend vllm --backend-args tp=8 --sampling-params max_tokens=16384 --result-dir $SKYT_HOME/data
 
-python -m skythought_evals.inference_and_check --task numina --model Qwen/QwQ-32B-Preview --tp 8 --max_tokens 16384 --split train --source amc_aime --filter-difficulty --result-dir $SKYT_HOME/data --inference
+skythought generate --task numina_olympiads --model Qwen/QwQ-32B-Preview --backend vllm --backend-args tp=8 --sampling-params max_tokens=16384 --result-dir $SKYT_HOME/data --start 0 --end 20000
+```
 
-python -m skythought_evals.inference_and_check --task numina --model Qwen/QwQ-32B-Preview --tp 8 --max_tokens 16384 --split train --source olympiads --end 20000 --filter-difficulty --result-dir $SKYT_HOME/data --inference
+This will save the results in individual folders in `result-dir`. The directory structure should be as follows:
+
+```
+├── Qwen_QwQ-32B-Preview_numina_myHash
+│   ├── results.json
+│   └── summary.json
+├── Qwen_QwQ-32B-Preview_apps_myHash
+│   ├── results.json
+│   └── summary.json
+...
 ```
 
 ### Step 2: Format the response
-After obtaining a list file for training data, convert them to a unified format (Note: This uses GPT-4o-mini to rewrite. The output is long and takes ~100 dollars for our preview data).
+After obtaining a list file for training data, convert them to a unified format (Note: This uses GPT-4o-mini to rewrite. The output is long and takes ~100 dollars for our preview data). 
+This will overwrite the result files "results.json" in the directory. 
+
 ```shell
 python scripts/convert_format.py --input_dir $SKYT_HOME/data --keys keys.txt
 ```
 
 ### Step 3: Reject Sampling on the formatted data (Example Usage with previous script)
+
+For each folder in `result-dir` saved previously (ex: `Qwen_QwQ-32B-Preview_numina_myHash`), obtain the scores with the following command
+
 ```shell 
-python -m skythought_evals.inference_and_check --task apps --model Qwen/QwQ-32B-Preview --tp 8 --max_tokens 16384 --split test --subset all --result-dir $SKYT_HOME/data --check
+skythought score --task apps --path <path_to_run_folder>
 ```
-Similar for other datasets.
+
+This will overwrite the `results.json` files and add a `"correctness"` entry to each model response. 
 
 ### Convert to ShareGPT format for training
 After obtaining multiple converted files, merge them together and convert to the ShareGPT format to perform training. In our preview model, we also add the science and riddle portion from the [STILL-2 model](https://arxiv.org/pdf/2412.09413), where interested readers can download their part of data and simply concatenating to the data obtained above.
+
 ```shell
 python scripts/convert_to_data.py --input_dir $SKYT_HOME/data --output $SKYT_HOME/data/train_data.json
 ```
